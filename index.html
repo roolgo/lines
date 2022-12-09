@@ -18,25 +18,30 @@
 </head>
 <body class="disable-dbl-tap-zoom">
 
-<canvas class="disable-dbl-tap-zoom" id="canvas" width="400" height="800" style="border:5px solid green;">
+<canvas class="disable-dbl-tap-zoom" id="canvas" width="400px" height="800px" style="border:5px solid green;">
 Your browser does not support the HTML canvas tag.</canvas>
 
+<audio src="https://cdn.freesound.org/previews/423/423166_4284968-lq.mp3" crossorigin="anonymous" ></audio>
+
 <script type="text/javascript">
-            // request first frame
+            
 			
     
     const canvas = document.getElementById("canvas");
 	const ctx = canvas.getContext('2d');
     //console.log(mouse.x);
     //console.log(mouse.y);
-    //canvas.width = window.innerWidth;
-    //canvas.height = window.innerHeight;
+    
     //canvas.width = 414px;
     //canvas.height = 896px;
     //console.log(score);
-    var mySound
     const start = Date.now();
-    mySound = new sound("https://cdn.freesound.org/previews/423/423166_4284968-lq.mp3");
+
+    // ctx.strokeStyle = "black";
+    // ctx.font = "900 50px sans-serif";
+    // canvas.textAlign = "start";
+    // ctx.fillStyle = "#ff0000";
+    // ctx.fillText("Tap to play");
 
             // constructor
             function rect(id, x, y, width, height, fill, stroke, strokewidth) {
@@ -72,20 +77,8 @@ Your browser does not support the HTML canvas tag.</canvas>
             return player;
         }
 
-        function sound(src) {
-            this.sound = document.createElement("audio");
-            this.sound.src = src;
-            this.sound.setAttribute("preload", "auto");
-            this.sound.setAttribute("controls", "none");
-            this.sound.style.display = "none";
-            document.body.appendChild(this.sound);
-            this.play = function(){
-                this.sound.play();
-            }
-            this.stop = function(){
-                this.sound.pause();
-    }    
-}
+
+
 	
     // We dont need any vector functionality as the operations are so 
     // simple we can just use undefined object.
@@ -94,18 +87,23 @@ Your browser does not support the HTML canvas tag.</canvas>
     const circleCenter = {x : 100, y : 100};
     const halfLineLen = 125;
     var time = 0;
-    const mouse = { x : 100, y : 100 }
+    const mouse = { x : 80, y : 100 }
     const r = 45;
     const speed = .01	;
 	var score = 0;
     var gameOn = false;
     
-    addEventListener("click",()=>{
-        console.log('clicado')
-        gameOn = true
-        requestAnimationFrame(update)
-    })
-    
+
+    requestAnimationFrame(update)
+
+    addEventListener("click", function(event){
+		  event.preventDefault()
+		  if(!gameOn){
+          gameOn = true;
+		  console.log("click"+" "+ "gameon = true")
+          update();
+        }
+		});
     
         
    
@@ -116,6 +114,8 @@ Your browser does not support the HTML canvas tag.</canvas>
     })
 	addEventListener("touchmove", function(event){
 		  event.preventDefault()
+            mouse.x =  (event.clieventntX - canvas.width / 2.0) - 5.0;
+            mouse.y = -(event.clientY - canvas.height / 2.0) + 5.0;
 		  //alert("Was preventDefault() called: " + event.defaultPrevented);
 		  console.log("touch arrastado")
 		});
@@ -153,16 +153,32 @@ Your browser does not support the HTML canvas tag.</canvas>
   
     
     function update() {
-		
-		ctx.clearRect(0, 0, canvas.width, canvas.height); // limpa canvas
-        
-		
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+		//ctx.clearRect(0, 0, canvas.width, canvas.height); // limpa canvas
+        var ctx = document.getElementById('canvas').getContext('2d');
+
+        // var img = new Image();
+        // img.onload = function() {
+        //     ctx.drawImage(img, -300, -250,canvas.width,canvas.height);
+        // };
+        // img.src = './background.png';
+
+        ctx.font = "30px Arial";
+        ctx.fillStyle = "red";
+        ctx.textAlign = "center";
+        ctx.fillText("Tap to play", canvas.width/2, canvas.height/2);
+
+
+		if(gameOn === true){
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 		//linha fica na atras do circulo
 		ctx.beginPath();
 		ctx.lineWidth = 8;
 		ctx.strokeStyle = 'green';
 		ctx.moveTo(50, 50);
-		ctx.lineTo(time * 150 , 50);
+		ctx.lineTo(150 , 50);
 		ctx.stroke();
 		
 		
@@ -187,7 +203,7 @@ Your browser does not support the HTML canvas tag.</canvas>
         ctx.fillStyle = intersects ? "green" : "red";
 		if(intersects){
 			score += 0.08;
-            mySound.play();
+            // mySound.play();
 		}
         
 
@@ -231,7 +247,7 @@ Your browser does not support the HTML canvas tag.</canvas>
 		
         requestAnimationFrame(update);
 		
-		
+    }
     }
 
 		var rects = [];
@@ -240,12 +256,12 @@ Your browser does not support the HTML canvas tag.</canvas>
         rects.push(new rect("Blue-Rectangle", 125, 25, 25, 25, "blue", "black", 10));
 		
 		var pc = new player(11, 1, 100, 1000, 3, 4, 4, 'john',true)
-    function isDone(){
+   
         
             
             update();
         
-    }
+    
         
     
     
@@ -253,4 +269,5 @@ Your browser does not support the HTML canvas tag.</canvas>
 
 </body>
 </html>
+
 
