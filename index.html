@@ -1,26 +1,42 @@
 <!DOCTYPE html>
 <html>
 	<head>
-	<style>.disable-dbl-tap-zoom{
-		touch-action: manipulation;
-		background-color: coral;
+	<style>
+		.disable-dbl-tap-zoom{
+			touch-action: manipulation;
+			
+		}
+		body {
+			display: flex;
+			margin: 0;
+			padding: 0;
+			background-color: black;
+			overflow: hidden;
+			width: 100%;
 		}
 </style>
 </head>
 <body class="disable-dbl-tap-zoom">
 
-<canvas class="disable-dbl-tap-zoom" id="canvas" width="500" height="500" style="border:1px solid #d3d3d3;">
+<canvas class="disable-dbl-tap-zoom" id="canvas" width="414" height="896" style="border:5px solid green;">
 Your browser does not support the HTML canvas tag.</canvas>
 
 <script type="text/javascript">
             // request first frame
 			
-    requestAnimationFrame(update);
+    
     const canvas = document.getElementById("canvas");
 	const ctx = canvas.getContext('2d');
-	
-
-
+    //console.log(mouse.x);
+    //console.log(mouse.y);
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    //canvas.width = 414px;
+    //canvas.height = 896px;
+    //console.log(score);
+    var mySound
+    const start = Date.now();
+    mySound = new sound("https://cdn.freesound.org/previews/423/423166_4284968-lq.mp3");
 
             // constructor
             function rect(id, x, y, width, height, fill, stroke, strokewidth) {
@@ -40,7 +56,7 @@ Your browser does not support the HTML canvas tag.</canvas>
 		
 		
 		    // constructor
-            function player(id, lvl, stamina, xp, stats1, stats2, stats3, name) {
+            function player(id, lvl, stamina, xp, stats1, stats2, stats3, name, isPlaying) {
                 this.id = id;
                 this.lvl = lvl || 1;
                 this.stamina = stamina;
@@ -49,11 +65,27 @@ Your browser does not support the HTML canvas tag.</canvas>
                 this.stats2 = stats2 || 3;
                 this.stats3 = stats3 || 4;
                 this.name = name || 'john';
+				this.isPlaying = isPlaying;
                 
                 return (this);
 
             return player;
         }
+
+        function sound(src) {
+            this.sound = document.createElement("audio");
+            this.sound.src = src;
+            this.sound.setAttribute("preload", "auto");
+            this.sound.setAttribute("controls", "none");
+            this.sound.style.display = "none";
+            document.body.appendChild(this.sound);
+            this.play = function(){
+                this.sound.play();
+            }
+            this.stop = function(){
+                this.sound.pause();
+    }    
+}
 	
     // We dont need any vector functionality as the operations are so 
     // simple we can just use undefined object.
@@ -64,14 +96,29 @@ Your browser does not support the HTML canvas tag.</canvas>
     var time = 0;
     const mouse = { x : 100, y : 100 }
     const r = 45;
-    const speed = 0.01;
+    const speed = .01	;
 	var score = 0;
+    var gameOn = false;
+    
+    addEventListener("click",()=>{
+        console.log('clicado')
+        gameOn = true
+        requestAnimationFrame(update)
+    })
+    
+    
+        
+   
     
     addEventListener("mousemove",(e)=>{
         mouse.x =  (e.clientX - canvas.width / 2.0) - 5.0;
         mouse.y = -(e.clientY - canvas.height / 2.0) + 5.0;
     })
-    
+	addEventListener("touchmove", function(event){
+		  event.preventDefault()
+		  //alert("Was preventDefault() called: " + event.defaultPrevented);
+		  console.log("touch arrastado")
+		});
 
     // Function to check intercept of line seg and circle
     // A,B end points of line segment
@@ -104,17 +151,23 @@ Your browser does not support the HTML canvas tag.</canvas>
         return dist < radius * radius;
      }
   
-  
-    function update() {     
-		//console.log(mouse.x);
-		//console.log(mouse.y);
-		canvas.width = window.innerWidth/2;
-		canvas.height = window.innerHeight/2;
-		//canvas.width = 414px;
-		//canvas.height = 896px;
-		//console.log(score);
+    
+    function update() {
 		
-         ctx.clearRect(0, 0, canvas.width, canvas.height);
+		ctx.clearRect(0, 0, canvas.width, canvas.height); // limpa canvas
+        
+		
+		//linha fica na atras do circulo
+		ctx.beginPath();
+		ctx.lineWidth = 8;
+		ctx.strokeStyle = 'green';
+		ctx.moveTo(50, 50);
+		ctx.lineTo(time * 150 , 50);
+		ctx.stroke();
+		
+		
+		
+		
          time += speed;
          A.x = - Math.cos(time) * halfLineLen;
          A.y = - Math.sin(time) * halfLineLen;
@@ -133,15 +186,18 @@ Your browser does not support the HTML canvas tag.</canvas>
         ctx.lineWidth = 2.0;
         ctx.fillStyle = intersects ? "green" : "red";
 		if(intersects){
-			score++
+			score += 0.08;
+            mySound.play();
 		}
-     
+        
+
+		//circulo
         ctx.beginPath();
         ctx.arc(circleCenter.x, circleCenter.y, r, 0, Math.PI * 2);	
         ctx.fill();
 
         ctx.strokeStyle = "rgba(150,50,50,0.8)";
-        ctx.lineWidth = 6;         
+        ctx.lineWidth = 18;         
 
         ctx.beginPath();  // You dont need to use moveTo after beginPath
         ctx.lineTo(A.x, A.y);  
@@ -155,18 +211,44 @@ Your browser does not support the HTML canvas tag.</canvas>
 		ctx.font = "900 50px sans-serif";
 		canvas.textAlign = "start";
 		ctx.fillStyle = "#ff0000";
-		ctx.fillText(score, canvas.width / 2, 50);
+		ctx.fillText(Math.round(score), canvas.width / 2, 50);
+		if(Math.round(score) > 0){
+            pc.xp = Math.round(score);
+        }
 		
-		pc.xp = score;
+		
+		//linha fica na frente do circulo
+		ctx.beginPath();
+		ctx.lineWidth = 8;
+		ctx.strokeStyle = 'green';
+		ctx.moveTo(50, 90); // Begin second sub-path
+		ctx.lineTo(290, 120);
+		ctx.stroke();
+		
+		
+		
+		
+		
         requestAnimationFrame(update);
+		
+		
     }
+
 		var rects = [];
 	    rects.push(new rect("Red-Rectangle", 15, 35, 65, 60, "red", "black", 10));
         rects.push(new rect("Green-Rectangle", 60, 80, 70, 50, "green", "black", 10));
         rects.push(new rect("Blue-Rectangle", 125, 25, 25, 25, "blue", "black", 10));
 		
-		var pc = new player(11, 1, 100, 1000, 3, 4, 4, 'john')
-	update();
+		var pc = new player(11, 1, 100, 1000, 3, 4, 4, 'john',true)
+    function isDone(){
+        
+            
+            update();
+        
+    }
+        
+    
+    
     </script>
 
 </body>
